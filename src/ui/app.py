@@ -28,8 +28,20 @@ def main():
 
     use_occ = st.sidebar.checkbox("OCC", value=True)
     use_pandape = st.sidebar.checkbox("Pandape", value=True)
-    # Agregar más sercicios cuando se agreguen nuevos scrapers
     
+    st.sidebar.checkbox("LinkedIn", value=False, disabled=True, help="Implementación en progreso")
+    st.sidebar.checkbox("Computrabajo", value=False, disabled=True, help="Implementación en progreso")
+    st.sidebar.checkbox("Indeed", value=False, disabled=True, help="Implementación en progreso")
+
+    st.markdown("### Filtros de Búsqueda")
+    location_option = st.radio(
+        "Selecciona la ubicación",
+        ("Todo México (sin filtro)", "CDMX", "Edo Mex", "Nuevo León", "Oaxaca", "Querétaro"),
+        horizontal=True
+    )
+    
+    location_param = None if "Todo méxico" in location_option else location_option
+
     keyword = st.text_input(
         "Ingresa el puesto o palabra clave: ",
         placeholder=""

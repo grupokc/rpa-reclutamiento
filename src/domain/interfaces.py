@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 from .models import CandidateSchema
 
 
@@ -9,7 +10,11 @@ class BaseScraper(ABC):
     La capa de infraestructura implementará estos métodos
     """
     @abstractmethod
-    def extract(self, keyword: str) -> list[CandidateSchema]:
+    def extract(
+        self, 
+        keyword: str,
+        location: Optional[str] = None
+    ) -> list[CandidateSchema]:
         """
         Extrae una lista de candidatos basada en palabras clave
         """

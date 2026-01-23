@@ -8,12 +8,16 @@ class PandapeScraper(BaseScraper):
     def __init__(self):
         self.logger = Logger(handlers=[ConsoleLogHandler()])
 
-    def extract(self, keyword: str) -> list[CandidateSchema]:
+    def extract(
+        self, 
+        keyword: str,
+        location: str | None = None
+    ) -> list[CandidateSchema]:
         formatted_keyword = keyword.replace(" ", "%20")
         url = "https://ats.pandape.com/Company/Dashboard"
         self.logger.info(
             "extract", 
-            f"Iniciando extracción en Pandape: {keyword}", 
+            f"Iniciando extracción en Pandape: {keyword} en {location or 'todo México'}", 
             metadata={"url": url}
         )
 

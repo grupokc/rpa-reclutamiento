@@ -12,15 +12,36 @@ class OCCScraper(BaseScraper):
     def __init__(self):
         self.logger = Logger(handlers=[ConsoleLogHandler()])
 
-    def extract(self, keyword: str) -> list[CandidateSchema]:
+    def extract(
+        self, 
+        keyword: str,
+        location: str | None = None
+    ) -> list[CandidateSchema]:
         """
         Abre el navegador, navega a la búsqueda y cierra.
         Retorna una lista vacía por ahora
         """
-        fromated_keyword = keyword.replace(" ","-")
+        fromated_keyword = keyword.replace(" ","%20")
         url = "https://www.occ.com.mx/empresas/"
 
-        self.logger.info("extract", f"Iniciando extracción para: {keyword}", metadata={"url": url})
+        location_slugs = {
+            "CDMX": "LOC-21957",
+            "Edo Mex": "LOC-60991", 
+            "Nuevo León": "LOC-83091",
+            "Oaxaca": "LOC-87725",
+            "Querétaro": "LOC-99788"
+        }
+
+        if location and location in location_slugs:
+            slug = location_slugs[location]
+            url = f"https://{url}/talento/resultados?facets={slug}&from=search&q={fromated_keyword}"
+        
+
+        self.logger.info(
+            "extract", 
+            f"Iniciando extracción para: {keyword} en {location or 'todo México'}", 
+            metadata={"url": url}
+        )
 
         extracted_data = []
 
