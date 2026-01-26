@@ -41,6 +41,13 @@ Este proyecto utiliza `uv` para la gestión de dependencias.
     uv run playwright install chromium
     ```
 
+3.  **Configuración de Variables de Entorno**:
+    Copia el archivo de ejemplo y configura tus credenciales:
+    ```bash
+    cp .env.example .env
+    ```
+    Edita `.env` con tus usuarios y contraseñas de OCC/Pandape.
+
 ## ▶️ Ejecución
 
 Puedes ejecutar la herramienta de dos formas:

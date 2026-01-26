@@ -20,8 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `CandidateSearchService` to orchestrate scraping and export.
 - **UI**:
     - Streamlit application (`src/ui/app.py`) with scraper selection and data export.
+    - Added **Location Filter** (CDMX, Edo Mex, etc.).
+    - Added placeholders for future scrapers (LinkedIn, Glassdoor, Indeed).
     - CLI entry point (`main.py`).
 - **Project Configuration**:
     - `pyproject.toml` and `uv.lock` for dependency management.
     - `README.md` with installation and usage instructions.
     - `.gitignore` for Python, Playwright, and Streamlit.
+    - `.env.example` for credential configuration.
+- **Architecture**:
+    - Added `_login` abstract method and stub implementations.
+    - Standardized `SELECTORS` dictionary in scrapers.
