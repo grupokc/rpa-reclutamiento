@@ -27,7 +27,7 @@ def main():
     st.sidebar.header("Configuración")
 
     use_occ = st.sidebar.checkbox("OCC", value=True)
-    use_pandape = st.sidebar.checkbox("Pandape", value=True)
+    use_pandape = st.sidebar.checkbox("Pandape", value=False, disabled=True) # Deshabilitado temporalmente durante el desarrollo de OCC
     
     st.sidebar.checkbox("LinkedIn", value=False, disabled=True, help="Implementación en progreso")
     st.sidebar.checkbox("Computrabajo", value=False, disabled=True, help="Implementación en progreso")

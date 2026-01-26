@@ -65,5 +65,5 @@ uv run python main.py
 ```
 
 ## 📝 Notas
-*   Los resultados se guardan automáticamente en formato JSON en la carpeta raíz.
+*   Los resultados se guardan automáticamente en la carpeta `data/` en formato JSON.
 *   Asegúrate de no abusar de las peticiones para evitar bloqueos por parte de los portales.

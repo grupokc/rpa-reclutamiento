@@ -5,8 +5,25 @@ from src.domain.models import CandidateSchema
 from src.infraestructura.logging import Logger, ConsoleLogHandler
 
 class PandapeScraper(BaseScraper):
+    """
+    Implementación concreta del scraper para OCC usando Playwright
+    """
+    SELECTORS = {
+        "login": {
+            "username": "",
+            "password": "",
+            "button": ""
+        },
+    }
+    
     def __init__(self):
         self.logger = Logger(handlers=[ConsoleLogHandler()])
+
+    def _login(self, page) -> None:
+        """
+        Realiza el login en Pandape
+        """
+        pass # TODO: Implementar login
 
     def extract(
         self, 

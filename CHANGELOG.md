@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-26
+
+### Added
+- **Domain Layer**:
+    - `CandidateSchema`: Added `id` and `education` fields.
+    - `CandidateSchema`: Changed `experience` type to `list[str]`.
+- **Infrastructure Layer**:
+    - **OCCScraper**:
+        - Robust selectors for `title`, `location`, `experience`, and `education` (based on HTML structure).
+        - Logic to select **50 candidates per page** automatically.
+        - **Deduplication logic** using scraped IDs to avoid re-processing candidates.
+        - Automatic pagination stop when no "Next" button is found.
+        - Integration with `JsonExporter` to save data incrementally (page by page).
+    - **Persistence**:
+        - Candidates are now saved to `data/candidates_occ_{keyword}_{location}.json`.
+
 ## [0.1.0] - 2026-01-23
 
 ### Added
