@@ -13,7 +13,8 @@ class BaseScraper(ABC):
     def extract(
         self, 
         keyword: str,
-        location: Optional[str] = None
+        location: Optional[str] = None,
+        limit: int = 100
     ) -> list[CandidateSchema]:
         """
         Extrae una lista de candidatos basada en palabras clave

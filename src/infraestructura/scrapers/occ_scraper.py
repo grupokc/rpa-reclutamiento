@@ -1,5 +1,6 @@
 import os
 import time
+import math
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
@@ -34,6 +35,9 @@ class OCCScraper(BaseScraper):
         "logout": {
             "menu_usuario": 'text=Sistemas',
             "cerrar_sesion": 'text=Cerrar sesión'
+        },
+        "popup": {
+            "cerrar_popup": '//*[@id="results-page"]/div/div[1]/div[3]/div/div[2]/div[1]/div[1]/div/svg'
         }
     }
 
@@ -263,7 +267,8 @@ class OCCScraper(BaseScraper):
     def extract(
         self, 
         keyword: str,
-        location: str | None = None
+        location: str | None = None,
+        limit: int = 100
     ) -> list[CandidateSchema]:
         """
         Abre el navegador, navega a la búsqueda y cierra.
@@ -306,10 +311,14 @@ class OCCScraper(BaseScraper):
                 time.sleep(2)
 
                 seen_ids = set()
+                
+                # Calcular páginas necesarias (50 por página)
+                max_pages = math.ceil(limit / 50)
+                self.logger.info("extract", f"Se extraerán hasta {limit} registros (aprox. {max_pages} páginas).")
 
-                for i in range(1, 11): # Intentar hasta 10 páginas
+                for i in range(1, max_pages + 1):
                     try:
-                        self.logger.info("extract", f"Extrayendo página {i}")
+                        self.logger.info("extract", f"Extrayendo página {i} de {max_pages}")
                         time.sleep(2)
                         
                         candidates = self._extract_candidates(page)
@@ -325,8 +334,9 @@ class OCCScraper(BaseScraper):
                             extracted_data.extend(new_candidates)
                             self.logger.info("extract", f"Agregados {len(new_candidates)} candidatos nuevos. Total: {len(extracted_data)}")
                             
+                            loc_str = location.replace(' ','_') if location else "Todo_Mexico"
                             exporter = JsonExporter()
-                            exporter.save(extracted_data, f"data/candidates_occ_{keyword.replace(' ','_')}_{location.replace(' ','_')}.json")
+                            exporter.save(extracted_data, f"data/candidates_occ_{keyword.replace(' ','_')}_{loc_str}.json")
                         else:
                              self.logger.info("extract", "No se encontraron candidatos nuevos en esta página.")
 
@@ -350,3 +360,4 @@ class OCCScraper(BaseScraper):
                 self.logger.info("extract", "Navegador cerrado.")
 
         return extracted_data
+        

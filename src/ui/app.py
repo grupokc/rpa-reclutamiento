@@ -42,10 +42,23 @@ def main():
     
     location_param = None if "Todo México" in location_option else location_option
 
-    keyword = st.text_input(
-        "Ingresa el puesto o palabra clave: ",
-        placeholder=""
-    )
+    col1, col2 = st.columns([1, 3])
+    
+    with col1:
+        limit = st.number_input(
+            "Registros deseados",
+            min_value=1,
+            max_value=1000,
+            value=100,
+            step=10,
+            help="El sistema intentará obtener esta cantidad de registros. Si hay menos disponibles, traerá los que encuentre."
+        )
+
+    with col2:
+        keyword = st.text_input(
+            "Puesto o palabra clave",
+            placeholder="Ej. Desarrollador Python"
+        )
 
     search_btn = st.button("Buscar Candidatos", type="primary")
 
@@ -65,7 +78,7 @@ def main():
             # Agregar más servicios
             
             try:
-                results = service.search_candidates(keyword, location_param)
+                results = service.search_candidates(keyword, location_param, limit)
 
                 if results:
                     st.success(f"✅ Se encontraron {len(results)} candidatos.")

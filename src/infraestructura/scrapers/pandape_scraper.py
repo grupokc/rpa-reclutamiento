@@ -28,7 +28,8 @@ class PandapeScraper(BaseScraper):
     def extract(
         self, 
         keyword: str,
-        location: str | None = None
+        location: str | None = None,
+        limit: int = 100
     ) -> list[CandidateSchema]:
         formatted_keyword = keyword.replace(" ", "%20")
         url = "https://ats.pandape.com/Company/Dashboard"

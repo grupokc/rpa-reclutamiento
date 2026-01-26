@@ -23,14 +23,14 @@ class CandidateSearchService:
             f"Scraper registrado: {scraper.__class__.__name__}"
         )
 
-    def search_candidates(self, keyword: str, location: str | None = None) -> List[CandidateSchema]:
+    def search_candidates(self, keyword: str, location: str | None = None, limit: int = 100) -> List[CandidateSchema]:
         """
         Ejecuta la búsqueda de candidatos en todos los scrapers registrados,
         agrega los resultados y los mantiene
         """
         self.logger.info(
             "Service",
-            f"Iniciando búsqueda para: '{keyword}' en '{location or 'Todo México'}'"
+            f"Iniciando búsqueda para: '{keyword}' en '{location or 'Todo México'}' con límite {limit}"
         )
         all_candidates: List[CandidateSchema] = []
 
@@ -40,7 +40,7 @@ class CandidateSearchService:
                     "Service",
                     f"Ejecutando: {scraper.__class__.__name__}..."
                 )
-                results = scraper.extract(keyword, location)
+                results = scraper.extract(keyword, location, limit)
                 all_candidates.extend(results)
                 self.logger.info(
                     "Service",

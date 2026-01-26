@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         - **Deduplication logic** using scraped IDs to avoid re-processing candidates.
         - Automatic pagination stop when no "Next" button is found.
         - Integration with `JsonExporter` to save data incrementally (page by page).
+        - Added `limit` parameter to control the number of pages to scrape.
     - **Persistence**:
         - Candidates are now saved to `data/candidates_occ_{keyword}_{location}.json`.
 
