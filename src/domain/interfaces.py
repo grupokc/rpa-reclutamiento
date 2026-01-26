@@ -20,6 +20,13 @@ class BaseScraper(ABC):
         """
         pass
 
+    @abstractmethod
+    def _login(self) -> None:
+        """
+        Inicia sesión en la plataforma (Método interno)
+        """
+        pass
+
 
 class DataExporter(ABC):
     """

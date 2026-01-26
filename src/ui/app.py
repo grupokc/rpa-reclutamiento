@@ -40,7 +40,7 @@ def main():
         horizontal=True
     )
     
-    location_param = None if "Todo méxico" in location_option else location_option
+    location_param = None if "Todo México" in location_option else location_option
 
     keyword = st.text_input(
         "Ingresa el puesto o palabra clave: ",
@@ -65,7 +65,7 @@ def main():
             # Agregar más servicios
             
             try:
-                results = service.search_candidates(keyword)
+                results = service.search_candidates(keyword, location_param)
 
                 if results:
                     st.success(f"✅ Se encontraron {len(results)} candidatos.")
