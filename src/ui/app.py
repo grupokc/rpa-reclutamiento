@@ -71,7 +71,7 @@ def main():
                     st.success(f"✅ Se encontraron {len(results)} candidatos.")
 
                     df = pd.DataFrame([c.model_dump() for c in results])
-                    st.dataframe(df, use_container_width=True)
+                    st.dataframe(df, width="stretch")
 
                     json_str = df.to_json(
                         orient="records", 
