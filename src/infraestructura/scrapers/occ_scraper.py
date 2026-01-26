@@ -9,8 +9,23 @@ class OCCScraper(BaseScraper):
     """
     Implementación concreta del scraper para OCC usando Playwright
     """
+    SELECTORS = {
+        "login": {
+            "iniciar_sesion": '//*[@id="login-link"]/span',
+            "username": '//*[@id="inputID_identifier"]',
+            "password": '//*[@id="inputID_password"]',
+            "button": '//*[@id="inputID_method"]'
+        },
+    }
+
     def __init__(self):
         self.logger = Logger(handlers=[ConsoleLogHandler()])
+
+    def _login(self) -> None:
+        """
+        Realiza el login en OCC
+        """
+        pass # TODO: Implementar login
 
     def extract(
         self, 
