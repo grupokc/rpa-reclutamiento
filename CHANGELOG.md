@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-27
+
+### Added
+- **Domain Layer**:
+    - `CandidateSchema`: Added `last_updated` field to track candidate activity freshness.
+    - Updated `Experience` model to be a structured object (Position, Company, Dates, Description) instead of a simple string list.
+- **Infrastructure Layer**:
+    - **OCCScraper**:
+        - Implemented **Detailed Experience Extraction**: Now extracts experience as structured objects, parsing position, company, and dates from the HTML.
+        - **Nested DOM Handling**: Improved extraction logic to handle nested wrapper `div`s in the experience list, ensuring all items are captured.
+        - **Last Activity Extraction**: Parsed "Última actividad" from candidate profile metadata.
+        - **Robustness**: Added fallback logic to Parse DOM if JSON extraction fails or is incomplete.
+
 ## [0.2.0] - 2026-01-26
 
 ### Added
