@@ -62,6 +62,12 @@ class PandapeScraper(BaseScraper):
         except Exception as e:
              self.logger.warning("login", "Tiempo de espera agotado o no se detectó el Dashboard. Continuando...")
 
+    def _logout(self, page):
+        """
+        Cierra sesión en el scraper
+        """
+        print("Por ahora un print para simular cierre de sesión y no falle el scraper")
+
 
     def extract(
         self, 
