@@ -11,15 +11,42 @@ Herramienta construida con **Clean Architecture** para la extracción automatiza
 *   **Interfaz de Usuario**: Streamlit
 *   **Arquitectura**: Clean Architecture (Domain, Application, Infrastructure, UI)
 
-## 📂 Estructura del Proyecto
+### 📂 Arquitectura del Proyecto (Clean Architecture)
+El proyecto sigue una arquitectura en capas para garantizar la escalabilidad y mantenibilidad:
 
 ```text
 src/
-├── domain/           # Modelos (CandidateSchema) e Interfaces (BaseScraper)
-├── application/      # Lógica de negocio (CandidateSearchService)
-├── infraestructura/  # Implementación técnica (Scrapers, Logger, Exporters)
-└── ui/               # Interfaz gráfica (Streamlit)
+├── domain/                  # Capa de Dominio (Reglas de Negocio)
+│   ├── models.py            # Entidades de datos (CandidateSchema, JobPost)
+│   └── interfaces.py        # Contratos / Interfaces (BaseScraper, DataExporter)
+│
+├── application/             # Capa de Aplicación (Casos de Uso)
+│   └── services.py          # Servicios orquestadores (CandidateSearchService)
+│
+├── infraestructura/         # Capa de Infraestructura (Implementaciones)
+│   ├── scrapers/            # Adaptadores de Scraping
+│   │   ├── occ_scraper.py   # Implementación para OCC
+│   │   │
+│   │   └── factory.py       # (Por implementar) Factory para instanciar scrapers
+│   ├── persistence/         # Adaptadores de Persistencia
+│   │   ├── json_exporter.py # Exportación a JSON
+│   │   └── toml_exporter.py # (Por implementar) Exportación a TOML
+│   └── logging.py           # Configuración centralizada de logs
+│
+├── ui/                      # Capa de Interfaz
+│   └── app.py               # Aplicación Web con Streamlit
+│
+├── main.py                  # Entry point para CLI
+├── .env                     # Variables de entorno (Credenciales)
+└── pyproject.toml           # Definición de dependencias
 ```
+
+### Descripción de Componentes
+
+*   **Domain**: Define *qué* hace el sistema. Contiene los modelos de datos (`models.py`) que representan a los candidatos y las interfaces (`interfaces.py`) que dictan cómo deben comportarse los scrapers y exportadores, sin preocuparse de la implementación.
+*   **Application**: Define *cómo* se coordinan las tareas. `services.py` contiene la lógica principal (e.g., `CandidateSearchService`) que utiliza las interfaces del dominio para ejecutar la búsqueda, extracción y guardado de datos.
+*   **Infrastructure**: Contiene los detalles técnicos. Aquí viven los scrapers reales (`occ_scraper.py`, `pandape_scraper.py`) que interactúan con los sitios web usando Playwright, y los exportadores (`json_exporter.py`) que escriben en disco.
+*   **UI**: La interfaz de usuario. `app.py` utiliza los servicios de la capa de aplicación para mostrar resultados al usuario final.
 
 ## 🛠️ Instalación
 
@@ -65,5 +92,5 @@ uv run python main.py
 ```
 
 ## 📝 Notas
-*   Los resultados se guardan automáticamente en formato JSON en la carpeta raíz.
+*   Los resultados se guardan automáticamente en la carpeta `data/` en formato JSON.
 *   Asegúrate de no abusar de las peticiones para evitar bloqueos por parte de los portales.

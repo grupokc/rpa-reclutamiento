@@ -33,14 +33,14 @@ class PandapeScraper(BaseScraper):
             if page.locator(self.SELECTORS["login"]["username"]).is_visible():
                 username = os.getenv("PANDAPE_USERNAME", "")
                 password = os.getenv("PANDAPE_PASSWORD", "")
-                
+
                 page.fill(self.SELECTORS["login"]["username"], username)
                 time.sleep(1)
                 page.fill(self.SELECTORS["login"]["password"], password)
                 time.sleep(1)
                 page.click(self.SELECTORS["login"]["submit"])
                 self.logger.info("login", "Credenciales enviadas.")
-                
+
                 # Esperar OTP
                 self._waiting_for_otp(page)
             else:
@@ -61,12 +61,13 @@ class PandapeScraper(BaseScraper):
             self.logger.info("login", "Acceso al Dashboard confirmado.")
         except Exception as e:
              self.logger.warning("login", "Tiempo de espera agotado o no se detectó el Dashboard. Continuando...")
-        
+
 
     def extract(
         self, 
         keyword: str,
-        location: str | None = None
+        location: str | None = None,
+        limit: int = 100
     ) -> list[CandidateSchema]:
         formatted_keyword = keyword.replace(" ", "%20")
         url = "https://ats.pandape.com/Company/Dashboard"

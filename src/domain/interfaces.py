@@ -13,7 +13,8 @@ class BaseScraper(ABC):
     def extract(
         self, 
         keyword: str,
-        location: Optional[str] = None
+        location: Optional[str] = None,
+        limit: int = 100
     ) -> list[CandidateSchema]:
         """
         Extrae una lista de candidatos basada en palabras clave
@@ -21,9 +22,17 @@ class BaseScraper(ABC):
         pass
 
     @abstractmethod
-    def _login(self) -> None:
+    def _login(self, page) -> None:
         """
         Inicia sesión en la plataforma (Método interno)
+        :param page: Objeto Page de Playwright (typed as Any to avoid coupling)
+        """
+        pass
+
+    @abstractmethod
+    def _logout(self, page) -> None:
+        """
+        Cierra la sesión en la plataforma para un cierre limpio incluso con errores
         """
         pass
 
