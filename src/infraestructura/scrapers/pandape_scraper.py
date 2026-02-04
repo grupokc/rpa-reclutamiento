@@ -298,7 +298,6 @@ class PandapeScraper(BaseScraper):
                                 url = href
 
                     # Ubicación (suele estar en un span o div secundario)
-                    # No tenemos clase exacta, buscamos texto genérico o iconos
                     # A veces es .candidate-location
                     loc_el = card.locator(self.SELECTORS["candidate_card"]["location"])
                     if loc_el.count() > 0:
@@ -308,12 +307,8 @@ class PandapeScraper(BaseScraper):
                         location = default_location if default_location else "Ubicación no encontrada"
                     
                     # ID Extraction
-                    # Try to get from data-id attribute on the contact button or row
                     cand_id = None
                     try:
-                        # Sometimes the card is wrapped in a div with data-id
-                        # But here 'card' is likely the inner container.
-                        # Let's check for the contact button which has data-id
                         contact_btn = card.locator(".js_ViewContact")
                         if contact_btn.count() > 0:
                             cand_id = contact_btn.first.get_attribute("data-id")
@@ -524,11 +519,6 @@ class PandapeScraper(BaseScraper):
                             # Empresa (Company)
                             # Intentar buscar el span dentro del div siguiente al título
                             # Estructura observada:
-                            # <div><strong>Position</strong></div>
-                            # <div><span>Company</span></div>
-                            # <div class="c-md text-italic"><p>Description</p></div>
-                            
-                            # Buscar todos los divs directos
                             detail_divs = col_detail.find_all('div', recursive=False)
                             
                             # El segundo div suele tener la empresa
@@ -587,9 +577,7 @@ class PandapeScraper(BaseScraper):
                     data["skills"].append(tag.get_text(strip=True))
 
             # --- CONTACTO (Email/Teléfono) ---
-            # Buscar en todo el documento patrones de email si no hay selectores claros
-            # El dump mostró "Email" 4 veces, quizás está en un bloque oculto o visible
-            # Intentar buscar mailto
+            # TODO: Implementar el click en ver datos de contacto
             if not data["email"]:
                 mailto = soup.select_one('a[href^="mailto:"]')
                 if mailto:
@@ -598,8 +586,6 @@ class PandapeScraper(BaseScraper):
             # --- SALARIO ---
             salary_container = soup.find('div', id='Salary')
             if salary_container:
-                # El salario está en col-9
-                # <div> $ <span>7,500</span> (Mensual bruto) </div>
                 col_9 = salary_container.find('div', class_='col-9')
                 if col_9:
                      data["salary"] = col_9.get_text(separator=" ", strip=True)
