@@ -117,10 +117,15 @@ def main():
                         force_ascii=False
                     )
 
+                    sources = []
+                    if use_occ: sources.append("OCC")
+                    if use_pandape: sources.append("Pandape")
+                    source_str = "_".join(sources) if sources else "Candidatos"
+
                     st.download_button(
                         label="📥 Descargar JSON",
                         data=json_str,
-                        file_name=f"candidatos_{keyword.replace(' ', '_')}.json",
+                        file_name=f"candidatos_{source_str}_{keyword.replace(' ', '_')}.json",
                         mime="application/json"
                     )
                 else:

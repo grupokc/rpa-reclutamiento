@@ -102,15 +102,6 @@ class PandapeScraper(BaseScraper):
             page.goto(os.getenv("PANDAPE_LOGOUT_URL"))
             self.logger.info("logout", "Sesión cerrada exitosamente.")
         except Exception as e: self.logger.error("logout", f"Error durante el cierre de sesión: {e}") 
-        
-    def _extract_candidates(self, page): 
-        """
-        Extrae los candidatos de la página actual
-        """
-        try:
-            candidates = []
-        except:
-            pass
 
 
 
@@ -415,14 +406,36 @@ class PandapeScraper(BaseScraper):
 
     def _change_page(self, page):
         try:
-            next_button = page.locator(self.SELECTORS["search"]["next_page"])
-            if next_button.is_visible():
-                next_button.click()
-                self.logger.info("extract", "Página siguiente.")
+            # Intentar click en el botón de siguiente usando la lógica de _has_next_page
+            # Usamos chaining de locators para mezclar XPath y CSS correctamente
+            pagination = page.locator('//*[@id="pagination"]/div/div[2]/div')
+            
+            # Selectores CSS relativos al contenedor
+            css_selectors = [
+                 "a.js_btnPaginationNext:not(.disabled)", # Prioridad: Clase única vista en logs
+                 "#btnPaginationNext:not(.disabled)",
+                 "a:has(i.icon-chevron-right):not(.disabled)" # Puede coincidir con Next y Last
+            ]
+            
+            for selector in css_selectors:
+                next_btn = pagination.locator(selector)
+                
+                # Usamos .first para evitar error de Strict Mode si hay múltiples coincidencias (ej. chevron)
+                if next_btn.count() > 0 and next_btn.first.is_visible():
+                    next_btn.first.click()
+                    self.logger.info("extract", f"Página siguiente clickeada (selector: {selector}).")
+                    return True
+                
+            # Fallback a selector antiguo
+            next_button_old = page.locator(self.SELECTORS["search"]["next_page"])
+            if next_button_old.is_visible():
+                next_button_old.click()
+                self.logger.info("extract", "Página siguiente (fallback old) clickeada.")
                 return True
-            else:
-                self.logger.info("extract", f"No se encontró la el botón de siguiente página.")
-                return False
+
+            self.logger.info("extract", "No se encontró el botón de siguiente página.")
+            return False
+            
         except Exception as e:
             self.logger.error("change_page", f"Error cambiando de página: {e}")
             return False
@@ -453,7 +466,43 @@ class PandapeScraper(BaseScraper):
         except Exception as e:
             self.logger.error("extract_detail", f"Error al obtener HTML del candidato: {e}")
             return None
-                
+
+    def _has_next_page(self, page):
+        """
+        Verifica si hay una página siguiente disponible.
+        XPath proporcionado: //*[@id="pagination"]/div/div[2]/div
+        Buscamos el botón 'Siguiente' o flecha derecha activa.
+        """
+        try:
+            # XPath al contenedor de paginación
+            pagination = page.locator('//*[@id="pagination"]/div/div[2]/div')
+            if pagination.count() == 0:
+                self.logger.warning("pagination", "Contenedor de paginación NO encontrado.")
+                return False
+            
+            # Utilizamos varías estrategias para encontrar el botón de siguiente página
+            # ya que pandape cambia sus selectores dinámicamente
+            
+            # Estrategia 1: Clase específica (visto en logs: js_btnPaginationNext)
+            next_btn_cls = pagination.locator("a.js_btnPaginationNext:not(.disabled)")
+            if next_btn_cls.count() > 0:
+                 return True
+
+            # Estrategia 2: ID específico
+            next_btn_id = pagination.locator("#btnPaginationNext:not(.disabled)")
+            if next_btn_id.count() > 0:
+                 return True
+
+            # Estrategia 3: Icono Chevron (usando .first para evitar error si hay múltiples como Next/Last)
+            next_btn_chevron = pagination.locator("a:has(i.icon-chevron-right):not(.disabled)")
+            if next_btn_chevron.count() > 0:
+                 return True
+            
+            return False
+
+        except Exception as e:
+            self.logger.warning("pagination", f"Error verificando paginación: {e}")
+            return False
 
     def _parse_candidate_detail(self, html_content: str) -> dict:
         """
@@ -606,7 +655,7 @@ class PandapeScraper(BaseScraper):
                 self.logger.info("enrich", f"Procesando {i+1}/{total}: {card.name}")
 
                 try:
-                    self._obtain_html(page)
+                    # self._obtain_html(page)
                     if "/CandidateCt/" in card.url or not card.experience:
                         html = self._get_candidate_html(page, card.url)
 
