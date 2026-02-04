@@ -33,6 +33,31 @@ def main():
     st.sidebar.checkbox("Computrabajo", value=False, disabled=True, help="Implementación en progreso")
     st.sidebar.checkbox("Indeed", value=False, disabled=True, help="Implementación en progreso")
 
+    st.sidebar.markdown("---")
+    debug_mode = st.sidebar.checkbox("🛠️ Modo Debug")
+    
+    selected_scraper_debug = None
+    if debug_mode:
+        st.sidebar.warning("⚠️ Modo Debug Activo")
+        selected_scraper_debug = st.sidebar.radio(
+            "Selecciona scraper para probar:",
+            ("OCC", "Pandape")
+        )
+        if st.sidebar.button("🐞 Probar Login"):
+            with st.spinner(f"Probando login en {selected_scraper_debug}..."):
+                try:
+                    scraper = None
+                    if selected_scraper_debug == "OCC":
+                        scraper = OCCScraper()
+                    elif selected_scraper_debug == "Pandape":
+                        scraper = PandapeScraper()
+                    
+                    if scraper:
+                        scraper.test_login()
+                        st.sidebar.success("Prueba finalizada. Revisa la consola para más detalles.")
+                except Exception as e:
+                    st.sidebar.error(f"Error en prueba: {e}")
+
     st.markdown("### Filtros de Búsqueda")
     location_option = st.radio(
         "Selecciona la ubicación",

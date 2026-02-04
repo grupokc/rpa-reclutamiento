@@ -580,6 +580,28 @@ class OCCScraper(BaseScraper):
             self.logger.error("extract", f"Error al cambiar de página: {e}")
             return False
 
+    def test_login(self):
+        """
+        Método para probar el login visualmente (debug)
+        """
+        url = "https://www.occ.com.mx/empresas/"
+        self.logger.info("debug", "Iniciando prueba de login en OCC...")
+        
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False)
+            context = browser.new_context()
+            page = context.new_page()
+            try:
+                page.goto(url)
+                self._login(page)
+                self.logger.info("debug", "Prueba finalizada. El navegador se cerrará en 10 segundos.")
+                time.sleep(10)
+            except Exception as e:
+                self.logger.error("debug", f"Error en prueba de login: {e}")
+                time.sleep(5) # Esperar para ver error
+            finally:
+                browser.close()
+
     def extract(
         self, 
         keyword: str,
@@ -677,8 +699,6 @@ class OCCScraper(BaseScraper):
                     # Guardado final (Sobreescribe con datos enriquecidos)
                     exporter.save(extracted_data, file_name)
                     self.logger.info("extract", "Enriquecimiento completado y guardado.")
-                
-                
 
             except Exception as e:
                 self.logger.error("extract", f"Error durante la navegación: {e}")
