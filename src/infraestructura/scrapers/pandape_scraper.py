@@ -420,20 +420,27 @@ class PandapeScraper(BaseScraper):
             for selector in css_selectors:
                 next_btn = pagination.locator(selector)
                 
-                # Usamos .first para evitar error de Strict Mode si hay múltiples coincidencias (ej. chevron)
-                if next_btn.count() > 0 and next_btn.first.is_visible():
-                    next_btn.first.click()
-                    self.logger.info("extract", f"Página siguiente clickeada (selector: {selector}).")
-                    return True
+                # count = next_btn.count()
+                # self.logger.debug("extract", f"Selector '{selector}' count: {count}")
+
+                if next_btn.count() > 0:
+                    # Usamos .first para evitar error de Strict Mode
+                    btn = next_btn.first
+                    if btn.is_visible():
+                        self.logger.info("extract", f"Click force=True en selector: {selector}")
+                        btn.click(force=True)
+                        return True
+                    else:
+                        self.logger.warning("extract", f"Botón encontrado pero NO visible: {selector}")
                 
             # Fallback a selector antiguo
             next_button_old = page.locator(self.SELECTORS["search"]["next_page"])
             if next_button_old.is_visible():
-                next_button_old.click()
-                self.logger.info("extract", "Página siguiente (fallback old) clickeada.")
+                next_button_old.click(force=True)
+                self.logger.info("extract", "Página siguiente (fallback old) clickeada (force=True).")
                 return True
 
-            self.logger.info("extract", "No se encontró el botón de siguiente página.")
+            self.logger.info("extract", "No se encontró el botón de siguiente página (o no visible).")
             return False
             
         except Exception as e:
@@ -652,7 +659,7 @@ class PandapeScraper(BaseScraper):
             self.logger.info("enrich", f"Iniciando enriquecimiento de {total} candidatos.")
 
             for i, card in enumerate(candidates_data):
-                self.logger.info("enrich", f"Procesando {i+1}/{total}: {card.name}")
+                self.logger.info("enrich", f"Enriqueciendo: {card.name}")
 
                 try:
                     # self._obtain_html(page)

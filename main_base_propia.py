@@ -1,5 +1,6 @@
 from src.infraestructura.scrapers.pandape_base_propia_scraper import PandapeBasePropiaScraper
 from src.infraestructura.persistence.json_exporter import JsonExporter
+from src.domain.models import CandidateSchema
 import os
 from dotenv import load_dotenv
 
@@ -19,27 +20,42 @@ def main():
     scraper = PandapeBasePropiaScraper()
     exporter = JsonExporter()
     
-    try:
-        candidates = scraper.extract(limit=100)
-        
-        print("\n" + "="*50)
-        print(f"Proceso finalizado.")
-        print(f"Total candidatos extraídos: {len(candidates)}")
-        print("="*50 + "\n")
-        
-        if candidates:
-            output_file = "data/candidatos_BasePropia.json"
-            exporter.save(candidates, output_file)
-            print(f"Resultados guardados en: {output_file}")
-        
-        for c in candidates:
-            print(f"- {c.name} ({c.position})")
-            if c.email:
-                print(f"  Email: {c.email}")
-            print(f"  Exp: {len(c.experience) if c.experience else 0} items")
-            
-    except Exception as e:
-        print(f"Error crítico durante la ejecución: {e}")
+    # --- Configuración para Extracción Masiva (60k) ---
+    queue_file = "data/cola_pendientes.jsonl"
+    final_file = "data/candidatos_completos.jsonl"
+    
+    TARGET_LIMIT = 200 
+    
+    print(f"--- FASE 1: COSECHA (Harvester) ---")
+    print(f"Meta: {TARGET_LIMIT} candidatos en cola.")
+    
+    # Cargar cola existente para ver cuánto falta
+    current_queue = exporter.load_jsonl(queue_file)
+    queue_ids = {item["id"] for item in current_queue if "id" in item}
+    print(f"En cola actualmente: {len(queue_ids)}")
+    
+    if len(queue_ids) < TARGET_LIMIT:
+        print("Iniciando recolección de URLs...")
+        scraper.harvest_candidates(
+            queue_file=queue_file, 
+            limit=TARGET_LIMIT - len(queue_ids), # Solo lo que falta
+            ignore_ids=queue_ids # Para no repetir cosecha
+        )
+    else:
+        print("Meta de cosecha alcanzada. Saltando a procesamiento.")
+
+    print(f"\n--- FASE 2: PROCESAMIENTO (Worker) ---")
+    scraper.process_queue(
+        queue_file=queue_file,
+        final_file=final_file,
+        batch_size=50
+    )
+    
+    print("\n" + "="*50)
+    print(f"Proceso masivo finalizado.")
+    print("="*50 + "\n")
 
 if __name__ == "__main__":
     main()
+        
+
