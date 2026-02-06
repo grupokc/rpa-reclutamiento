@@ -1,5 +1,6 @@
 import time
 import math
+import re
 from playwright.sync_api import sync_playwright
 from src.domain.interfaces import BaseScraper
 from src.domain.models import CandidateSchema, Experience
@@ -50,6 +51,18 @@ class PandapeScraper(BaseScraper):
 
     def __init__(self):
         self.logger = Logger(handlers=[ConsoleLogHandler()])
+
+    def clean_text(self, text: str | None) -> str:
+        """
+        Sanitiza el texto:
+        1. Convierte None a string vacío.
+        2. Reemplaza saltos de línea, tabs y múltiples espacios por un solo espacio.
+        3. Elimina espacios extra al inicio y final.
+        """
+        if not text:
+            return ""
+        # Reemplazar cualquier whitespace (incluyendo \n, \t) por un espacio simple
+        return re.sub(r'\s+', ' ', text).strip()
 
     def _login(self, page):
         """
@@ -265,11 +278,11 @@ class PandapeScraper(BaseScraper):
                     
                     # Nombre
                     name_el = card.locator(self.SELECTORS["candidate_card"]["name"])
-                    name = name_el.inner_text().strip() if name_el.count() > 0 else "Nombre no encontrado"
+                    name = self.clean_text(name_el.inner_text()) if name_el.count() > 0 else "Nombre no encontrado"
                     
                     # Puesto / Titular
                     job_el = card.locator(self.SELECTORS["candidate_card"]["job"])
-                    job = job_el.inner_text().strip() if job_el.count() > 0 else "Puesto no encontrado"
+                    job = self.clean_text(job_el.inner_text()) if job_el.count() > 0 else "Puesto no encontrado"
                     
                     # Url del perfil
                     # Buscar el primer enlace que parezca ir al detalle
@@ -292,7 +305,7 @@ class PandapeScraper(BaseScraper):
                     # A veces es .candidate-location
                     loc_el = card.locator(self.SELECTORS["candidate_card"]["location"])
                     if loc_el.count() > 0:
-                        location = loc_el.inner_text().strip() 
+                        location = self.clean_text(loc_el.inner_text()) 
                     else:
                         # Fallback al location search parameter si no se encuentra en la tarjeta
                         location = default_location if default_location else "Ubicación no encontrada"
@@ -327,7 +340,7 @@ class PandapeScraper(BaseScraper):
 
                         edu_ct_el = card.locator(".candidate-info > div:nth-child(2)")
                         if edu_ct_el.count() > 0:
-                             education_str = edu_ct_el.inner_text().strip().replace("\n", " ")
+                             education_str = self.clean_text(edu_ct_el.inner_text())
 
                     else:
                         experience_list = []
@@ -338,10 +351,10 @@ class PandapeScraper(BaseScraper):
                                 item = exp_items.nth(j)
                                 # Intentar separar Puesto (span) de Empresa (texto fuera del span)
                                 pos_span = item.locator("span")
-                                position_exp = pos_span.inner_text().strip() if pos_span.count() > 0 else "Sin puesto"
+                                position_exp = self.clean_text(pos_span.inner_text()) if pos_span.count() > 0 else "Sin puesto"
                                 
                                 # Texto completo
-                                full_text = item.text_content().strip()
+                                full_text = self.clean_text(item.text_content())
                                 # Remover el texto del puesto para dejar la empresa
                                 company_exp = full_text.replace(position_exp, "").strip()
                                 
@@ -357,7 +370,7 @@ class PandapeScraper(BaseScraper):
                         count_edu = edu_items.count()
                         for k in range(count_edu):
                             try:
-                                item_text = edu_items.nth(k).text_content().strip()
+                                item_text = self.clean_text(edu_items.nth(k).text_content())
                                 if item_text:
                                     education_list.append(item_text)
                             except:
@@ -372,12 +385,12 @@ class PandapeScraper(BaseScraper):
                         last_updated_el = card.locator("text=/Última actualización:/i")
                         
                         if last_updated_el.count() > 0:
-                            raw_text = last_updated_el.first.inner_text().strip()
+                            raw_text = last_updated_el.first.inner_text()
                             # Extraer lo que está después de los dos puntos
                             if ":" in raw_text:
-                                last_updated_text = raw_text.split(":", 1)[1].strip()
+                                last_updated_text = self.clean_text(raw_text.split(":", 1)[1])
                             else:
-                                last_updated_text = raw_text.replace("Última actualización", "").strip()
+                                last_updated_text = self.clean_text(raw_text.replace("Última actualización", ""))
                     except Exception as e:
                         self.logger.warning("extract_candidates", f"No se pudo extraer fecha actualización: {e}")
 
@@ -394,7 +407,7 @@ class PandapeScraper(BaseScraper):
                         salary="Pendiente" 
                     )
                     candidates_data.append(candidate)
-                    self.logger.info("extract_candidates", f"Candidato extraído: {name} - {job}")
+                    # self.logger.info("extract_candidates", f"Candidato extraído: {name} - {job}")
 
                 except Exception as e_card:
                      self.logger.warning("extract_candidates", f"Error extrayendo tarjeta {i}: {e_card}")
@@ -531,7 +544,7 @@ class PandapeScraper(BaseScraper):
             # Intentar extraer el nombre real del encabezado
             name_container = soup.select_one('#divCandidateName .font-3xxl')
             if name_container:
-                name_text = name_container.get_text(strip=True)
+                name_text = self.clean_text(name_container.get_text())
                 if name_text:
                     data["name"] = name_text
 
@@ -570,7 +583,7 @@ class PandapeScraper(BaseScraper):
                             # Título (Position)
                             title_el = col_detail.find('strong')
                             if title_el:
-                                position = title_el.get_text(strip=True)
+                                position = self.clean_text(title_el.get_text())
                             
                             # Empresa (Company)
                             # Intentar buscar el span dentro del div siguiente al título
@@ -581,16 +594,16 @@ class PandapeScraper(BaseScraper):
                             if len(detail_divs) > 1:
                                 company_el = detail_divs[1].find('span')
                                 if company_el:
-                                    company = company_el.get_text(strip=True)
+                                    company = self.clean_text(company_el.get_text())
                                 else:
                                     # Fallback: texto limpio del segundo div
-                                    company = detail_divs[1].get_text(strip=True)
+                                    company = self.clean_text(detail_divs[1].get_text())
 
                             # Descripción
                             # Buscar clase específica .text-break-word o el div italico
                             desc_el = col_detail.find('p', class_='text-break-word')
                             if desc_el:
-                                description = desc_el.get_text(strip=True)
+                                description = self.clean_text(desc_el.get_text())
                             
                             data["experience"].append(Experience(
                                 position=position,
@@ -619,7 +632,7 @@ class PandapeScraper(BaseScraper):
                 rows = edu_container.find_all('div', class_='row')
                 for row in rows:
                     try:
-                        text = row.get_text(separator=" ", strip=True)
+                        text = self.clean_text(row.get_text())
                         if text:
                             data["education"].append(text)
                     except:
@@ -630,21 +643,21 @@ class PandapeScraper(BaseScraper):
             if skills_container:
                 tags = skills_container.find_all('div', class_='custom-tag')
                 for tag in tags:
-                    data["skills"].append(tag.get_text(strip=True))
+                    data["skills"].append(self.clean_text(tag.get_text()))
 
             # --- CONTACTO (Email/Teléfono) ---
             # TODO: Implementar el click en ver datos de contacto
             if not data["email"]:
                 mailto = soup.select_one('a[href^="mailto:"]')
                 if mailto:
-                    data["email"] = mailto.get_text(strip=True)
+                    data["email"] = self.clean_text(mailto.get_text())
 
             # --- SALARIO ---
             salary_container = soup.find('div', id='Salary')
             if salary_container:
                 col_9 = salary_container.find('div', class_='col-9')
                 if col_9:
-                     data["salary"] = col_9.get_text(separator=" ", strip=True)
+                     data["salary"] = self.clean_text(col_9.get_text())
             
         except Exception as e:
             self.logger.error("parse_detail", f"Error parseando detalle: {e}")
@@ -682,7 +695,7 @@ class PandapeScraper(BaseScraper):
                                 try:
                                     latest_exp = detail_data["experience"][0]
                                     if latest_exp.position:
-                                        curr_pos = latest_exp.position.strip()
+                                        curr_pos = latest_exp.position
                                         if curr_pos and len(curr_pos) > 2:
                                             update_data["position"] = curr_pos
                                 except:

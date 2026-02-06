@@ -91,6 +91,25 @@ Ejecuta el script principal para una búsqueda rápida en terminal:
 uv run python main.py
 ```
 
+### 3. Extracción Masiva (Base Propia Pandape)
+Script especializado para extraer grandes volúmenes (60k+) en dos fases:
+1.  **Cosecha (Harvest)**: Recolecta IDs rápidamente por estado.
+2.  **Procesamiento (Worker)**: Enriquece los perfiles uno a uno.
+
+```bash
+uv run main_base_propia.py
+```
+
+### 4. Herramientas de Exportación
+Convierte tus archivos JSONL recolectados a otros formatos (CSV, TOML, TOON):
+
+```bash
+# Sintaxis: uv run main_exporters.py <input_file> <format>
+uv run main_exporters.py data/candidatos_completos.jsonl csv
+uv run main_exporters.py data/candidatos_completos.jsonl toon
+```
+**Formatos soportados:** `csv`, `toml`, `toon`.
+
 ## 📝 Notas
 *   Los resultados se guardan automáticamente en la carpeta `data/` en formato JSON.
 *   Asegúrate de no abusar de las peticiones para evitar bloqueos por parte de los portales.

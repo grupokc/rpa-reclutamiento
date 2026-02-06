@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-02-06
+### Added
+- **Persistence Layer**:
+    - **CsvExporter**: Export data to CSV optimized for Excel (UTF-8-SIG).
+        - **Hybrid Flattening**: Latest experience in dedicated columns (`latest_position`, `latest_company`) for filtering, plus full history in `experience_summary_text`.
+    - **TomlExporter**: Export to TOML format (best for configuration or small datasets).
+    - **ToonExporter**: Export to **TOON** (Token-Oriented Object Notation) for AI token efficiency.
+- **CLI Tools**:
+    - `main_exporters.py`: Unified CLI to convert JSONL files to any supported format (CSV, TOML, TOON).
+    - Usage: `uv run main_exporters.py <input_file> <format>`
+- **Core Improvements**:
+    - **Text Sanitization**: Added `clean_text` regex-based utility to `PandapeScraper`.
+    - Applied globally to remove excessive whitespace, tabs, and newlines from all extracted fields.
+
 ## [0.3.1] - 2026-02-06
 
 ### Added
