@@ -26,17 +26,21 @@ src/
 ├── infraestructura/         # Capa de Infraestructura (Implementaciones)
 │   ├── scrapers/            # Adaptadores de Scraping
 │   │   ├── occ_scraper.py   # Implementación para OCC
-│   │   │
-│   │   └── factory.py       # (Por implementar) Factory para instanciar scrapers
+│   │   ├── pandape_scraper.py # Base para Pandape
+│   │   └── pandape_base_propia_scraper.py # Scraper especializado (Harvest/Process)
 │   ├── persistence/         # Adaptadores de Persistencia
-│   │   ├── json_exporter.py # Exportación a JSON
-│   │   └── toml_exporter.py # (Por implementar) Exportación a TOML
+│   │   ├── json_exporter.py # Exportación a JSONL
+│   │   ├── csv_exporter.py  # Exportación a CSV (Hybrid Flattening)
+│   │   ├── toml_exporter.py # Exportación a TOML
+│   │   └── toon_exporter.py # Exportación a TOON
 │   └── logging.py           # Configuración centralizada de logs
 │
 ├── ui/                      # Capa de Interfaz
 │   └── app.py               # Aplicación Web con Streamlit
 │
-├── main.py                  # Entry point para CLI
+├── main.py                  # Entry point (CLI Básico)
+├── main_base_propia.py      # Entry point (Extracción Masiva)
+├── main_exporters.py        # Entry point (Conversión de Formatos)
 ├── .env                     # Variables de entorno (Credenciales)
 └── pyproject.toml           # Definición de dependencias
 ```
@@ -45,7 +49,7 @@ src/
 
 *   **Domain**: Define *qué* hace el sistema. Contiene los modelos de datos (`models.py`) que representan a los candidatos y las interfaces (`interfaces.py`) que dictan cómo deben comportarse los scrapers y exportadores, sin preocuparse de la implementación.
 *   **Application**: Define *cómo* se coordinan las tareas. `services.py` contiene la lógica principal (e.g., `CandidateSearchService`) que utiliza las interfaces del dominio para ejecutar la búsqueda, extracción y guardado de datos.
-*   **Infrastructure**: Contiene los detalles técnicos. Aquí viven los scrapers reales (`occ_scraper.py`, `pandape_scraper.py`) que interactúan con los sitios web usando Playwright, y los exportadores (`json_exporter.py`) que escriben en disco.
+*   **Infrastructure**: Contiene los detalles técnicos. Aquí viven los scrapers reales (`occ_scraper.py`, `pandape_scraper.py`) que interactúan con los sitios web usando Playwright, y los exportadores (`json_exporter.py`, `csv_exporter.py`, etc.) que escriben en disco en varios formatos.
 *   **UI**: La interfaz de usuario. `app.py` utiliza los servicios de la capa de aplicación para mostrar resultados al usuario final.
 
 ## 🛠️ Instalación
